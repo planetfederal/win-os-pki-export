@@ -10,7 +10,9 @@ by Jason Geffner <jason.geffner@ngssecure.com> that can be found in the doc fold
 
 The repo contain a Visual Studio 2010 buildable project. The repo contains a Debug and Release build versions. Executable are in:
 
+
 DEBUG:   https://github.com/boundlessgeo/win-os-pki-export/blob/master/exportrsa/Debug/exportrsa.exe
+
 RELEASE: https://github.com/boundlessgeo/win-os-pki-export/blob/master/exportrsa/Release/exportrsa.exe
 
 How to use
