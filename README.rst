@@ -15,6 +15,12 @@ DEBUG:   https://github.com/boundlessgeo/win-os-pki-export/blob/master/exportrsa
 
 RELEASE: https://github.com/boundlessgeo/win-os-pki-export/blob/master/exportrsa/Release/exportrsa.exe
 
+Code
+~~~~
+
+Other the complexity of the VS project project, the single file code is here:
+https://github.com/boundlessgeo/win-os-pki-export/blob/master/exportrsa/exportrsa/exportrsa.cpp
+
 How to use
 ~~~~~~~~~~
 
