@@ -1,31 +1,53 @@
-=================================
-Exporting Non-Exportable RSA Keys
-=================================
+=================================================
+Exporting Windows Non-Exportable RSA Private Keys
+=================================================
 
-This project has been directly inspired by the follwing paper:
+This project has been directly inspired by the follwing paper and slideshow:
 
 https://www.nccgroup.trust/globalassets/our-research/uk/whitepapers/exporting_non-exportable_rsa_keys.pdf
 
-by Jason Geffner <jason.geffner@ngssecure.com> that can be found in the doc folder
+https://www.nccgroup.trust/globalassets/resources/uk/presentations/2011/blackhat_europe_2011_exporting_non-exportable_rsa_keys.pdf
 
-The repo contain a Visual Studio 2010 buildable project. The repo contains a Debug and Release build versions. Executable are in:
+by Jason Geffner <jason.geffner@ngssecure.com> of NCC Group (UK)
 
+https://www.nccgroup.trust/uk/our-services/security-consulting/
 
-DEBUG:   https://github.com/boundlessgeo/win-os-pki-export/blob/master/exportrsa/Debug/exportrsa.exe
+Executables
+~~~~~~~~~~~
 
-RELEASE: https://github.com/boundlessgeo/win-os-pki-export/blob/master/exportrsa/Release/exportrsa.exe
+Pre-built ``exportrsa.exe`` executables are located in:
+
+DEBUG: `exportrsa/Debug/`_ (requires Visual Studio 2010 installed)
+
+RELEASE: `exportrsa/Release/`_ (requires only Visual Studio 2010 runtime installed)
 
 Code
 ~~~~
 
-Other the complexity of the VS project project, the single file code is here:
-https://github.com/boundlessgeo/win-os-pki-export/blob/master/exportrsa/exportrsa/exportrsa.cpp
+Visual Studio 2010 build project:
+
+`exportrsa/exportrsa.sln`_
+
+The single file of code is here:
+    
+`exportrsa/exportrsa/exportrsa.cpp`_
 
 How to use
 ~~~~~~~~~~
 
-The code parse all system key stores and export in .pxf files all that have a RSA private key available.
+The code parses all system key stores and exports in .pxf files for all certificates that have a RSA private key available.
 
-Just run exportrsa.exe in a command shell
+Just run ``exportrsa.exe`` in a command shell:
 
-probably you can have error due to missing of: msvcr100d.dll (debug) or msvcr100.dll (release version). You need to install: vcredist_x86_2010.exe (https://www.microsoft.com/en-us/download/details.aspx?id=5555)
+.. figure:: exportrsa-console.png
+   :align: center
+   
+   Sample run of ``exportrsa.exe``
+
+If you receive an error due to missing the ``msvcr100.dll`` (release version), you will need to install the `vcredist_x86_2010.exe`_ runtime. To use the debug version, you will need Visual Studio 2010 installed.
+
+.. _exportrsa/exportrsa.sln: ./exportrsa/exportrsa.sln
+.. _vcredist_x86_2010.exe: https://www.microsoft.com/en-us/download/details.aspx?id=5555
+.. _exportrsa/Debug/: ./exportrsa/Debug/
+.. _exportrsa/Release/: ./exportrsa/Release/
+.. _exportrsa/exportrsa/exportrsa.cpp: ./exportrsa/exportrsa/exportrsa.cpp
