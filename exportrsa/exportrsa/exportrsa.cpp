@@ -23,6 +23,8 @@ OTHER DEALINGS IN THE SOFTWARE.
 code inspired from the following paper:
 https://www.nccgroup.trust/globalassets/our-research/uk/whitepapers/exporting_non-exportable_rsa_keys.pdf
 
+Modification by: Luigi Pirelli (Boundless Inc.) 2016
+
 ExportRSA v1.0
 by Jason Geffner (jason.geffner@ngssecure.com)
 This program enumerates all certificates in all system stores in all system
