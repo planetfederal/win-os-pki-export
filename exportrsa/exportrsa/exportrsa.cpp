@@ -1,4 +1,4 @@
-/*
+﻿/*
 This is free and unencumbered software released into the public domain.
 Anyone is free to copy, modify, publish, use, compile, sell, or
 distribute this software, either in source code form or as a compiled
@@ -79,45 +79,45 @@ BOOL g_fWow64Process;
 
 wstring
 getpass(
-    const char *prompt,
-    bool show_asterisk=true)
+	const char *prompt,
+	bool show_asterisk=true)
 {
-    const char BACKSPACE=8;
-    const char RETURN=13;
+	const char BACKSPACE=8;
+	const char RETURN=13;
 
-    wstring password;
-    unsigned char ch=0;
+	wstring password;
+	unsigned char ch=0;
 
-    cout <<prompt << endl;
+	cout <<prompt << endl;
 
-    DWORD con_mode;
-    DWORD dwRead;
+	DWORD con_mode;
+	DWORD dwRead;
 
-    HANDLE hIn=GetStdHandle(STD_INPUT_HANDLE);
+	HANDLE hIn=GetStdHandle(STD_INPUT_HANDLE);
 
-    GetConsoleMode( hIn, &con_mode );
-    SetConsoleMode( hIn, con_mode & ~(ENABLE_ECHO_INPUT | ENABLE_LINE_INPUT) );
+	GetConsoleMode( hIn, &con_mode );
+	SetConsoleMode( hIn, con_mode & ~(ENABLE_ECHO_INPUT | ENABLE_LINE_INPUT) );
 
-    while( ReadConsoleA( hIn, &ch, 1, &dwRead, NULL) && ch !=RETURN )
-    {
-        if(ch==BACKSPACE)
-        {
-            if(password.length()!=0)
-            {
-                if(show_asterisk)
-                    cout <<"\b \b";
-                password.resize(password.length()-1);
-            }
-        }
-        else
-        {
-            password+=ch;
-            if(show_asterisk)
-                cout <<'*';
-        }
-    }
-    cout <<endl;
-    return password;
+	while( ReadConsoleA( hIn, &ch, 1, &dwRead, NULL) && ch !=RETURN )
+	{
+		if(ch==BACKSPACE)
+		{
+			if(password.length()!=0)
+			{
+				if(show_asterisk)
+					cout <<"\b \b";
+				password.resize(password.length()-1);
+			}
+		}
+		else
+		{
+			password+=ch;
+			if(show_asterisk)
+				cout <<'*';
+		}
+	}
+	cout <<endl;
+	return password;
 }
 
 BOOL WINAPI
@@ -523,7 +523,7 @@ ParseStore(
                     NULL);
         CloseHandle(hFile);
 
-        fprintf(stdout, "SUCCESSFULLY exported cert bundle for \"%S\"in file \"%S\" \n\n", dwCertName, wszFileName );
+		fprintf(stdout, "SUCCESSFULLY exported cert bundle for \"%S\"in file \"%S\" \n\n", dwCertName, wszFileName );
     }
     return TRUE;
 }

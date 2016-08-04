@@ -1,4 +1,4 @@
-﻿Build started 7/27/2016 7:52:37 AM.
+﻿Build started 8/4/2016 3:51:24 AM.
      1>Project "c:\Users\boundless\documents\visual studio 2010\Projects\exportrsa\exportrsa\exportrsa.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Debug\exportrsa.unsuccessfulbuild" because "AlwaysCreate" was specified.
@@ -6,7 +6,7 @@
          All outputs are up-to-date.
          c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yu"StdAfx.h" /Fp"Debug\exportrsa.pch" /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt exportrsa.cpp
          exportrsa.cpp
-     1>c:\users\boundless\documents\visual studio 2010\projects\exportrsa\exportrsa\exportrsa.cpp(526): warning C4996: 'swprintf': swprintf has been changed to conform with the ISO C standard, adding an extra character count parameter. To use traditional Microsoft swprintf, set _CRT_NON_CONFORMING_SWPRINTFS.
+     1>c:\users\boundless\documents\visual studio 2010\projects\exportrsa\exportrsa\exportrsa.cpp(506): warning C4996: 'swprintf': swprintf has been changed to conform with the ISO C standard, adding an extra character count parameter. To use traditional Microsoft swprintf, set _CRT_NON_CONFORMING_SWPRINTFS.
                  c:\program files (x86)\microsoft visual studio 10.0\vc\include\swprintf.inl(85) : see declaration of 'swprintf'
        ManifestResourceCompile:
          All outputs are up-to-date.
@@ -27,4 +27,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:02.41
+Time Elapsed 00:00:02.15
