@@ -24,6 +24,9 @@ code inspired from the following paper:
 https://www.nccgroup.trust/globalassets/our-research/uk/whitepapers/exporting_non-exportable_rsa_keys.pdf
 
 Modification by: Luigi Pirelli (Boundless Inc.) 2016
+    * ask permission to export private key
+    * ask for new pwd to crypt exported .pxf
+    * avoid browse all stores but only MY
 
 ExportRSA v1.0
 by Jason Geffner (jason.geffner@ngssecure.com)
@@ -76,65 +79,57 @@ BOOL g_fWow64Process;
 
 wstring
 getpass(
-	const char *prompt,
-	bool show_asterisk=true)
+    const char *prompt,
+    bool show_asterisk=true)
 {
-	const char BACKSPACE=8;
-	const char RETURN=13;
+    const char BACKSPACE=8;
+    const char RETURN=13;
 
-	wstring password;
-	unsigned char ch=0;
+    wstring password;
+    unsigned char ch=0;
 
-	cout <<prompt << endl;
+    cout <<prompt << endl;
 
-	DWORD con_mode;
-	DWORD dwRead;
+    DWORD con_mode;
+    DWORD dwRead;
 
-	HANDLE hIn=GetStdHandle(STD_INPUT_HANDLE);
+    HANDLE hIn=GetStdHandle(STD_INPUT_HANDLE);
 
-	GetConsoleMode( hIn, &con_mode );
-	SetConsoleMode( hIn, con_mode & ~(ENABLE_ECHO_INPUT | ENABLE_LINE_INPUT) );
+    GetConsoleMode( hIn, &con_mode );
+    SetConsoleMode( hIn, con_mode & ~(ENABLE_ECHO_INPUT | ENABLE_LINE_INPUT) );
 
-	while( ReadConsoleA( hIn, &ch, 1, &dwRead, NULL) && ch !=RETURN )
-	{
-		if(ch==BACKSPACE)
-		{
-			if(password.length()!=0)
-			{
-				if(show_asterisk)
-					cout <<"\b \b";
-				password.resize(password.length()-1);
-			}
-		}
-		else
-		{
-			password+=ch;
-			if(show_asterisk)
-				cout <<'*';
-		}
-	}
-	cout <<endl;
-	return password;
+    while( ReadConsoleA( hIn, &ch, 1, &dwRead, NULL) && ch !=RETURN )
+    {
+        if(ch==BACKSPACE)
+        {
+            if(password.length()!=0)
+            {
+                if(show_asterisk)
+                    cout <<"\b \b";
+                password.resize(password.length()-1);
+            }
+        }
+        else
+        {
+            password+=ch;
+            if(show_asterisk)
+                cout <<'*';
+        }
+    }
+    cout <<endl;
+    return password;
 }
 
 BOOL WINAPI
-CertEnumSystemStoreCallback(
-        const void* pvSystemStore,
-        DWORD dwFlags,
-        PCERT_SYSTEM_STORE_INFO pStoreInfo,
-        void* pvReserved,
-        void* pvArg)
+ParseStore(
+        const char *storeName
+)
 {
     // Open a given certificate store
-    HCERTSTORE hCertStore = CertOpenStore(
-                CERT_STORE_PROV_SYSTEM,
-                0,
-                NULL,
-                dwFlags | CERT_STORE_OPEN_EXISTING_FLAG | CERT_STORE_READONLY_FLAG,
-                pvSystemStore);
+    HCERTSTORE hCertStore = CertOpenSystemStoreA(0, storeName);
     if (NULL == hCertStore)
     {
-        //fprintf(stderr, "Cannot open cert store. Skip it: %X\n", GetLastError());
+        fprintf(stderr, "Cannot open cert store. Skip it: %X\n", GetLastError());
         return TRUE;
     }
 
@@ -528,25 +523,8 @@ CertEnumSystemStoreCallback(
                     NULL);
         CloseHandle(hFile);
 
-		fprintf(stdout, "SUCCESSFULLY exported cert bundle for \"%S\"in file \"%S\" \n\n", dwCertName, wszFileName );
+        fprintf(stdout, "SUCCESSFULLY exported cert bundle for \"%S\"in file \"%S\" \n\n", dwCertName, wszFileName );
     }
-    return TRUE;
-}
-
-BOOL WINAPI
-CertEnumSystemStoreLocationCallback(
-        LPCWSTR pvszStoreLocations,
-        DWORD dwFlags,
-        void* pvReserved,
-        void* pvArg)
-{
-    // Enumerate all system stores in a given system store location
-    CertEnumSystemStore(
-                dwFlags,
-                NULL,
-                NULL,
-                CertEnumSystemStoreCallback);
-
     return TRUE;
 }
 
@@ -564,11 +542,9 @@ int _tmain(int argc, _TCHAR* argv[])
         IsWow64Process( GetCurrentProcess(),
                         &g_fWow64Process);
     }
-    // Scan all system store locations
-    CertEnumSystemStoreLocation(
-                0,
-                NULL,
-                CertEnumSystemStoreLocationCallback);
+
+    // Scan stores
+    ParseStore("MY");
 
     return 0;
 }
