@@ -200,12 +200,8 @@ CertEnumSystemStoreCallback(
         // container
         HCRYPTPROV hProv;
         HCRYPTPROV hProvTemp;
-#ifdef WINCE
-        HCRYPTPROV hCryptProvOrNCryptKey;
-#else
         HCRYPTPROV_OR_NCRYPT_KEY_HANDLE hCryptProvOrNCryptKey;
         NCRYPT_KEY_HANDLE hNKey;
-#endif
         BOOL fCallerFreeProvOrNCryptKey;
         if (!CryptAcquireCertificatePrivateKey(
                     pCertContext,
@@ -225,9 +221,7 @@ CertEnumSystemStoreCallback(
 
         // do the job
         hProv = hCryptProvOrNCryptKey;
-#ifndef WINCE
         hNKey = hCryptProvOrNCryptKey;
-#endif
         HCRYPTKEY hKey;
         BYTE* pbData = NULL;
         DWORD cbData = 0;
@@ -337,7 +331,6 @@ CertEnumSystemStoreCallback(
                 continue;
             }
         }
-#ifndef WINCE
         else
         {
             fprintf(stdout, "Key for \"%S\" is a CNG key\n", dwCertName);
@@ -456,7 +449,6 @@ CertEnumSystemStoreCallback(
                         cbData,
                         0);
         }
-#endif
 
         // ask for pwd to encrypt exported private key
         wstring password  = getpass("Enter password to protect exported cert: ",true); // Show asterisks
@@ -487,18 +479,9 @@ CertEnumSystemStoreCallback(
         // key container
         CertSetCertificateContextProperty(
                     pCertContext,
-            #ifdef WINCE
-                    CERT_KEY_PROV_HANDLE_PROP_ID,
-            #else
                     CERT_HCRYPTPROV_OR_NCRYPT_KEY_HANDLE_PROP_ID,
-            #endif
                     0,
-            #ifdef WINCE
-                    (void*)hProvTemp);
-            #else
-                    (void*)((CERT_NCRYPT_KEY_SPEC == dwKeySpec) ?
-                                hNKey : hProvTemp));
-            #endif
+                    (void*)((CERT_NCRYPT_KEY_SPEC == dwKeySpec) ? hNKey : hProvTemp));
 
         // Export the temporary certificate store to a PFX data blob in memory
         CRYPT_DATA_BLOB cdb;
