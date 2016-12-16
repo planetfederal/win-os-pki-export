@@ -28,7 +28,7 @@ Visual Studio 2010 build project:
 
 `exportrsa/exportrsa.sln`_
 
-The single file of code is here:
+The single code file is here:
     
 `exportrsa/exportrsa/exportrsa.cpp`_
 
