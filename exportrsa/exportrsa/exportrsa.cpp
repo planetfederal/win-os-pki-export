@@ -546,6 +546,17 @@ int _tmain(int argc, _TCHAR* argv[])
                         &g_fWow64Process);
     }
 
+    // check type of cryptoapi version
+    HCRYPTPROV hCryptProv = NULL;  
+    if(CryptAcquireContext(&hCryptProv,NULL,NULL,PROV_RSA_FULL,CRYPT_VERIFYCONTEXT))                     
+    {
+        printf("CryptoAPI is working\n\n");
+    }else
+    {
+        printf("Error 0x%.8x",GetLastError());
+        printf("CryptoAPI Next Generation is working\n\n");
+    }
+
     // Scan stores
     ParseStore("MY");
 
