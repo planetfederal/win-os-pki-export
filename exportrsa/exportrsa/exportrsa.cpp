@@ -144,6 +144,7 @@ ParseStore(
         if (dwCertName)
         {
             free(dwCertName);
+            dwCertName = NULL;
         }
 
         if(!(cbSize = CertGetNameString(
@@ -154,7 +155,8 @@ ParseStore(
             NULL,
             0)))
         {
-           fprintf(stderr, "CertGetName size failed.");
+           fprintf(stderr, "CertGetNameString size failed.");
+           continue;
         }
         dwCertName = (LPTSTR)malloc(cbSize * sizeof(TCHAR));
 
@@ -166,7 +168,8 @@ ParseStore(
             dwCertName,
             cbSize))
         {
-            fprintf(stderr, "CertGetName failed.");
+            fprintf(stderr, "CertGetNameString failed.");
+            continue;
         }
 
         // Ensure that the certificate's public key is RSA
@@ -187,7 +190,7 @@ ParseStore(
                     &dwKeySpec,
                     &dwKeySpecSize))
         {
-            //fprintf(stderr, "Skip cert with NO private key for %S: %x\n", dwCertName, GetLastError());
+            fprintf(stderr, "Skip cert with NO private key for %S: %x\n", dwCertName, GetLastError());
             continue;
         }
 
@@ -223,7 +226,7 @@ ParseStore(
         if (CERT_NCRYPT_KEY_SPEC != dwKeySpec)
         {
             // This code path is for CryptoAPI
-            //fprintf(stdout, "Key for %S use CryptoAPI\n", dwCertName);
+            fprintf(stdout, "Key for %S use CryptoAPI\n", dwCertName);
 
             // Retrieve a handle to the certificate's private key
             if (!CryptGetUserKey(
