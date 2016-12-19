@@ -613,6 +613,15 @@ int _tmain(int argc, _TCHAR* argv[])
                         &g_fWow64Process);
     }
 
+    // determine if current OS is FIPS complient
+    // https://en.wikipedia.org/wiki/Federal_Information_Processing_Standards
+#ifndef NT_SUCCESS
+#   define NT_SUCCESS(Status) (((NTSTATUS)(Status)) >= 0)
+#endif
+    BOOLEAN bFipsEnabled = FALSE;
+    if (NT_SUCCESS(BCryptGetFipsAlgorithmMode(&bFipsEnabled)))
+        printf("FIPS is %Senabled.\n",bFipsEnabled ? L"" : L"not ");
+
     // check type of cryptoapi version
     HCRYPTPROV hCryptProv = NULL;  
     if(CryptAcquireContext(&hCryptProv,NULL,NULL,PROV_RSA_FULL,CRYPT_VERIFYCONTEXT))                     
